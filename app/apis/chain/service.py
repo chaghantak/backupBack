@@ -51,6 +51,7 @@ class ChainService:
 
         return jsonify({'result': 'success', 'items': result})
 
+
     @staticmethod
     def get_events_ttp(params):
         if 'ttp' in params and params['ttp'] != '':
@@ -106,6 +107,27 @@ class ChainService:
             return jsonify({'result': 'error', 'message': '검색 요소(id) 가 없습니다.'})
 
     @staticmethod
+    def get_killchain_id(params):
+        if 'id' in params and params['id'] != '':
+            # 안 가져올 컬럼 정보
+            set_column = {
+
+            }
+
+            query_str = dict()
+
+            add_mongo_query(params, query_str)
+
+            event_result = list(chain_db[ChainCollection.APT291_CHAINS].find(query_str, set_column))
+
+            if len(event_result) == 1:
+                return jsonify({'result': 'success', 'items': parse_chain(json.loads(dumps(event_result[0])))})
+            else:
+                return jsonify({'result': 'success', 'items': []})
+        else:
+            return jsonify({'result': 'error', 'message': '검색 요소(id) 가 없습니다.'})
+
+    @staticmethod
     def get_neo_chain_id(params):
         if 'id' in params and params['id'] != '':
             event_id = params['id']
@@ -116,8 +138,8 @@ class ChainService:
             #        for node in nodes:
             #           print(node)
             with neo4j_db.session() as session:
-                query = "MATCH (n)-[r]->(m) WHERE n.id='{event_id}' RETURN *"
-                # query = f"MATCH (m)-[r:related] -> (n:Event) RETURN m, r"
+                # query = f"MATCH (m)-[:related] -> (n:Event) WHERE n.id='{event_id}' RETURN m"
+                query = f"MATCH (m)-[r:related] -> (n:Event) RETURN m, r"
                 nodes = session.run(query)
 
                 result = []
@@ -160,4 +182,3 @@ class ChainService:
         result = sorted_tactic(result)
 
         return jsonify({'result': 'success', 'test': result})
-

@@ -20,4 +20,9 @@ class CampaignDto:
     test_params = api.model('Domain Test', {
         'params': fields.String
     })
-    # url_search = api.model()
+
+    attack_table_params = api.model('Attack Table Params', {
+        'group': fields.Boolean,
+        'country': fields.Boolean,
+        'year': fields.Boolean
+    })

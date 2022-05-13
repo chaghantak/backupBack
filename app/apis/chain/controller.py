@@ -50,6 +50,18 @@ class EventsById(Resource):
 
         return ChainService.get_events_id(params)
 
+@api.route('/killchain-id')
+class KillChainById(Resource):
+    @api.expect(ChainDto.id_searchKill)
+    def post(self):
+        """
+        event id 값으로 해당 chain 을상세 조회
+        _index, event.category, event.type 별로 구분 하여 리턴
+        :return:
+        """
+        params = request.get_json()
+
+        return ChainService.get_killchain_id(params)
 
 @api.route('/neo-chain-id')
 class NeoChainById(Resource):
@@ -62,16 +74,3 @@ class NeoChainById(Resource):
         params = request.get_json()
 
         return ChainService.get_neo_chain_id(params)
-
-
-# @api.route('/test')
-# class TestChainById(Resource):
-#     @api.expect(ChainDto.test_search)
-#     def post(self):
-#         """
-#         test
-#         :return:
-#         """
-#         params = request.get_json()
-#
-#         return ChainService.get_test_chain_id(params)

@@ -23,22 +23,6 @@ class TacticCollection:
         "exfiltration": 13,
         "impact": 14,
     }
-    navi = {
-        "reconnaissance": 'TA0043',
-        "resource-development": 'TA0042',
-        "initial-access": 'TA0001',
-        "execution": 'TA0002',
-        "persistence": 'TA0003',
-        "privilege-escalation": 'TA0004',
-        "defense-evasion": 'TA0005',
-        "credential-access": 'TA0006',
-        "discovery": 'TA0007',
-        "lateral-movement": 'TA0008',
-        "collection": 'TA0009',
-        "command-and-control": 'TA0011',
-        "exfiltration": 'TA0010',
-        "impact": 'TA0040',
-    }
 
 
 def process_threat(event_id: str, threat: dict, threats: dict):
@@ -393,6 +377,28 @@ def parse_auditbeat(item: dict, result: dict):
 
     result['event'] = event
 
+def parse_killchain(item: dict, result: dict):
+
+    item_host_ip: dict = item.get('host_ip')
+    item_chain_ttps: dict = item.get('chain_ttps')
+    item_subgraph: dict = item.get('subgraph')
+    item_len_chain: dict = item.get('len_chain')
+    item_chain_score: dict = item.get('chain_score')
+
+    event = dict()
+
+    if item_host_ip is not None:
+        event['host_ip'] = item_host_ip
+    if item_chain_ttps is not None:
+        event['chain_ttps'] = item_chain_ttps
+    if item_len_chain is not None:
+        event['len_chain'] = item_len_chain
+    if item_chain_score is not None:
+        event['chain_score'] = item_chain_score
+    if item_subgraph is not None:
+        event['subgraph'] = item_subgraph
+
+    result['killchain'] = event
 
 def parse_event(item: dict) -> dict:
     """
@@ -415,6 +421,19 @@ def parse_event(item: dict) -> dict:
 
     return result
 
+def parse_chain(item: dict) -> dict:
+    """
+    :param item:
+    :return:
+    """
+    result = dict()
+
+
+
+    result['_id'] = item.get('_id')
+    parse_killchain(item, result)
+
+    return result
 
 def add_mongo_query(params: dict, query_str: dict):
     if params is not None:
@@ -454,6 +473,3 @@ def sorted_tactic(list_data):
             list_data[num]['sorted_num'] = navigator[list_data[num]['name'].lower()]
     sort_list = sorted(list_data, key=lambda item: item['sorted_num'])
     return sort_list
-
-
-

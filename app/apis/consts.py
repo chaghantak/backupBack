@@ -19,6 +19,7 @@ class EventCategoryConst:
     SERVICE = 'service'
     SCHEDULED = "scheduled"
 
+
 class EventTypeConst:
     START = 'start'
     END = 'end'

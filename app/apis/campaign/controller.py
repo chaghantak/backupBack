@@ -49,11 +49,13 @@ class Uimenu(Resource):
 
 @api.route('/campaign-list-join')
 class CampaignJoin(Resource):
+    @api.expect(CampaignDto.attack_table_params)
     def post(self):
         """
         postgres: group_country_map, cyber_campaign_collections
         """
-        return CampaignService.get_join_campaign()
+        params = request.get_json()
+        return CampaignService.get_join_campaign(params)
 
 
 @api.route('/campaign-filename')

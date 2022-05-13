@@ -50,7 +50,6 @@ class CampaignService:
                   CyberCampaignCollectionsPeFilename.pe_name) \
             .add_columns(CyberCampaignCollectionsPestudioResult.pestudio_processed) \
             .all()
-
         for campaign_all in join_data:
             campaign = campaign_all[0]
             campaign = campaign.__dict__
@@ -74,60 +73,41 @@ class CampaignService:
     @staticmethod
     def get_campaign_ttps(params):
         result = []
-
+        tactic_navi = TacticCollection.navi
+        search_navi = TacticCollection.navigator
+        for k, v in tactic_navi.items():
+            tac = {}
+            tac['id'] = v
+            tac['name'] = k
+            tac['techniques'] = []
+            result.append(tac)
         if not params:
             return {'items': result, 'result': 'faild'}
-
         split_params = params['ttp'].split(' ')
-
         if len(split_params) < 1:
             return {'items': result, 'result': 'faild'}
-
         for ttp in split_params:
             ttp_info = AttackSimpleInfoVer100.query.filter_by(ttp=ttp).first()
             if ttp_info is None:
                 return {'items': result, 'result': 'faild'}
-
             ttp_info = ttp_info.__dict__
-
             table = DictMaker(ttp_info)
             tactic, tech, subtech = table.tacticmaker(ttp_info), table.techmaker(ttp_info), table.subtechmaker(ttp_info)
-
-            if result:
-                is_tictac = True
-                is_tech = True
-
-                for ticidx in range(len(result)):
-                    if ttp_info['ttp'].split('.')[0] == result[ticidx]['id']:
-                        for techidx in range(len(result[ticidx]['techniques'])):
-                            if ttp_info['ttp'].split('.')[1] == result[ticidx]['techniques'][techidx]['id']:
-                                if ttp_info['subtechnique_name']:
-                                    result[ticidx]['techniques'][techidx]['subTechniques'].append(subtech)
-                                    is_tictac = False
-                                    is_tech = False
-                                break
-
-                        if is_tech:
-                            if ttp_info['subtechnique_name']:
-                                tech['subTechniques'].append(subtech)
-                            result[ticidx]['techniques'].append(tech)
-                            is_tictac = False
-                            break
-
-                if is_tictac:
-                    if ttp_info['subtechnique_name']:
-                        tech['subTechniques'].append(subtech)
-                    tactic['techniques'].append(tech)
-                    result.append(tactic)
-
-            elif not result:
-                if ttp_info['subtechnique_name']:
+            if not result[search_navi[tactic['name']] - 1]['techniques']:
+                if subtech:
                     tech['subTechniques'].append(subtech)
-                tactic['techniques'].append(tech)
-                result.append(tactic)
-
-        result = sorted_tactic(result)
-
+                result[search_navi[tactic['name']] - 1]['techniques'].append(tech)
+            else:
+                is_tach = True
+                for idx in range(len(result[search_navi[tactic['name']] - 1]['techniques'])):
+                    if result[search_navi[tactic['name']] - 1]['techniques'][idx]['id'] == tech['id']:
+                        is_tach = False
+                        if subtech:
+                            result[search_navi[tactic['name']] - 1]['techniques'][idx]['subTechniques'].append(subtech)
+                if is_tach:
+                    if subtech:
+                        tech['subTechniques'].append(subtech)
+                    result[search_navi[tactic['name']] - 1]['techniques'].append(tech)
         return {'items': result, 'result': 'success'}
 
     @staticmethod
@@ -150,19 +130,21 @@ class CampaignService:
         return {"items": result, "result": "success"}
 
     @staticmethod
-    def get_join_campaign():
+    def get_join_campaign(params):
         result = []
 
         join_data = CyberCampaignCollections.query \
             .join(GroupCountryMap, GroupCountryMap.name == CyberCampaignCollections.attack_group) \
             .add_columns(CyberCampaignCollections.attack_group, CyberCampaignCollections.attack_year,
-                         GroupCountryMap.country, CyberCampaignCollections.true_ttps) \
+                         GroupCountryMap.country, CyberCampaignCollections.true_ttps, CyberCampaignCollections.index) \
             .all()
 
         for data in join_data:
             table = DictMaker(data)
             data = table.columnsmaker(data)
             result.append(data)
+
+        result = sorted_option(result, params)
 
         return {'items': result}
 
@@ -266,3 +248,4 @@ class CampaignService:
             result.append(db)
 
         return {'item': result}
+

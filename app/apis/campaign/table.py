@@ -68,9 +68,11 @@ class UiAccMenu(db.Model):
     __tablename__ = 'ui_acc_menu'
 
     index = db.Column(db.Integer(), primary_key=True)
+    btn_index = db.Column(db.Integer())
     gui_type = db.Column(db.Text())
     train_type = db.Column(db.Text())
     depth = db.Column(db.Numeric())
     parent_id = db.Column(db.Numeric())
     type = db.Column(db.Text())
     value = db.Column(db.Text())
+    value_code = db.Column(db.String())

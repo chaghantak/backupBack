@@ -32,10 +32,8 @@ class ChainDto:
     })
 
     """
-    test model
-    """
-
-    test_search = api.model('Test Events Search', {
+        _id 및 chain DB id 값으로 조회할때 사용할 model killchain
+        """
+    id_searchKill = api.model('Id KillChain Search', {
         'id': fields.String(required=False)
     })
-
